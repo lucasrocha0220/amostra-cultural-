@@ -1,13 +1,373 @@
-<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Sociedade Ideal | Painel local</title><link rel="stylesheet" href="styles.css"><style>
-.panel-wrap{max-width:1100px;margin:0 auto;padding:0 22px 50px}.privacy-note{background:#eaf7ef;border:1px solid #bfe5cb;border-radius:14px;padding:15px 18px;color:#205c38;margin-bottom:22px}.stats{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:14px;margin:20px 0}.stat{background:#fff;border:1px solid #e3e8ef;border-radius:16px;padding:18px;box-shadow:0 5px 18px #172b4d0b}.stat small{display:block;color:#667085;margin-bottom:8px}.stat strong{font-size:27px;color:#17345e}.dash-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}.dash-card{background:white;border:1px solid #e3e8ef;border-radius:16px;padding:20px;min-width:0}.bar-row{display:grid;grid-template-columns:155px 1fr 42px;gap:10px;align-items:center;margin:17px 0}.bar-label{font-size:13px}.bar-bg{height:12px;background:#edf1f6;border-radius:20px;overflow:hidden}.bar-fill{height:100%;background:linear-gradient(90deg,#39a879,#72c7a0);border-radius:20px}.table-wrap{overflow:auto}table{border-collapse:collapse;width:100%;font-size:14px}th,td{text-align:left;padding:12px 10px;border-bottom:1px solid #e8edf3;white-space:nowrap}th{color:#586782} .tools{display:flex;gap:10px;flex-wrap:wrap;margin:18px 0}.tools button{cursor:pointer;border:0;border-radius:10px;padding:12px 15px;font-weight:700}.export{background:#17345e;color:#fff}.clear{background:#fff0ef;color:#a3322c;border:1px solid #f0c7c4!important}.empty{text-align:center;color:#667085;padding:28px 12px}.muted{color:#667085;font-size:13px}@media(max-width:850px){.stats{grid-template-columns:repeat(2,minmax(0,1fr))}.dash-grid{grid-template-columns:1fr}}@media(max-width:480px){.bar-row{grid-template-columns:115px 1fr 34px;gap:7px}.stat{padding:14px}.stat strong{font-size:23px}}
-</style></head><body><header class="topbar"><a class="brand" href="index.html"><span class="brand-icon">🏙️</span><span>SOCIEDADE<strong>IDEAL</strong></span></a><nav class="nav" aria-label="Navegação principal"><a href="index.html">Início</a><a href="quiz.html">Quiz</a><a href="resultados.html">Modelos</a><a href="painel.html" class="active">Painel</a><a href="sobre.html">Sobre</a></nav><div class="motto"><b>📊</b> Resultados da apresentação</div></header>
-<main><div class="page-heading"><h1>📊 Painel de resultados</h1><p>Acompanhe as escolhas feitas neste computador durante a apresentação.</p></div><div class="panel-wrap"><div class="privacy-note">🔒 <strong>Registro local:</strong> os resultados ficam salvos neste navegador, neste computador. Não são enviados para a internet. Use sempre o mesmo navegador para manter o histórico.</div><div class="stats"><div class="stat"><small>Participações</small><strong id="total">0</strong></div><div class="stat"><small>Igualitária</small><strong id="igualitaria">0</strong></div><div class="stat"><small>Desenvolvimentista</small><strong id="desenvolvimentista">0</strong></div><div class="stat"><small>Sustentável</small><strong id="sustentavel">0</strong></div><div class="stat"><small>Democrática</small><strong id="democratica">0</strong></div></div><div class="dash-grid"><section class="dash-card"><h2>Distribuição dos resultados</h2><p class="muted">Cada participação conta para o(s) modelo(s) com maior pontuação. Empates contam para todos os modelos empatados.</p><div id="bars"></div></section><section class="dash-card"><h2>Última participação</h2><div id="last" class="empty">Ainda não há resultados registrados.</div><p class="muted">O painel mostra o nome informado e as respostas de cada participante; use apenas o primeiro nome ou apelido se preferir.</p></section></div><section class="dash-card" style="margin-top:18px"><h2>Histórico de participações</h2><div class="tools"><button class="export" id="exportBtn">⬇ Exportar CSV</button><button class="clear" id="clearBtn">Apagar histórico deste computador</button></div><div class="table-wrap" id="history"></div></section><p class="muted" style="margin-top:18px">Dica: teste o quiz uma vez antes de começar a feira e apague esse teste no painel. Não limpe os dados do navegador durante a apresentação.</p></div></main><footer class="footer"><span>🏙️ <strong>Sociedade Ideal</strong> &nbsp; | &nbsp; Projeto escolar — Itinerário de Humanas</span><span>🍃 Juntos podemos construir um futuro melhor!</span></footer>
-<script>
-const KEY='sociedadeIdealRegistrosV1';const models={igualitaria:'Sociedade Igualitária',desenvolvimentista:'Sociedade Desenvolvimentista',sustentavel:'Sociedade Sustentável',democratica:'Sociedade Democrática'};
-function read(){try{return JSON.parse(localStorage.getItem(KEY)||'[]')}catch(e){return []}}
-function datefmt(iso){return new Date(iso).toLocaleString('pt-BR',{dateStyle:'short',timeStyle:'short'})}
-function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
-function render(){const rows=read();document.getElementById('total').textContent=rows.length;const counts={igualitaria:0,desenvolvimentista:0,sustentavel:0,democratica:0};rows.forEach(r=>(r.vencedores||[]).forEach(k=>{if(k in counts)counts[k]++}));Object.keys(counts).forEach(k=>document.getElementById(k).textContent=counts[k]);const max=Math.max(1,...Object.values(counts));document.getElementById('bars').innerHTML=Object.keys(counts).map(k=>`<div class="bar-row"><span class="bar-label">${models[k].replace('Sociedade ','')}</span><div class="bar-bg"><div class="bar-fill" style="width:${counts[k]/max*100}%"></div></div><strong>${counts[k]}</strong></div>`).join('');const last=rows[rows.length-1];document.getElementById('last').innerHTML=last?`<strong>${esc(last.nome||'Não informado')}</strong><p>${esc(last.resultado)}</p><p>${datefmt(last.data)}</p><p class="muted">Participação ${rows.length} de ${rows.length}</p>`:'Ainda não há resultados registrados.';document.getElementById('history').innerHTML=rows.length?`<table><thead><tr><th>#</th><th>Nome</th><th>Data e hora</th><th>Resultado</th><th>Escolhas</th></tr></thead><tbody>${rows.slice().reverse().map((r,i)=>`<tr><td>${rows.length-i}</td><td>${esc(r.nome||"Não informado")}</td><td>${datefmt(r.data)}</td><td>${esc(r.resultado)}</td><td><details><summary>Ver respostas</summary><ol>${(r.respostas||[]).map(a=>`<li><strong>${esc(a.pergunta)}</strong><br>${esc(a.escolha)}</li>`).join('')}</ol><p>Pontuação: ${Object.entries(r.scores||{}).map(([k,v])=>`${models[k]}: ${v}`).map(esc).join(" · ")}</p></details></td></tr>`).join('')}</tbody></table>`:'<div class="empty">Nenhuma participação ainda. <a href="quiz.html">Comece pelo quiz</a>.</div>'}
-document.getElementById('exportBtn').addEventListener('click',()=>{const rows=read();if(!rows.length){alert('Ainda não há resultados para exportar.');return}const csv=[['Participação','Nome','Data e hora','Resultado','Respostas','Igualitária','Desenvolvimentista','Sustentável','Democrática'],...rows.map((r,i)=>[i+1,r.nome||'Não informado',datefmt(r.data),r.resultado,(r.respostas||[]).map(a=>a.pergunta+': '+a.escolha).join(' | '),...['igualitaria','desenvolvimentista','sustentavel','democratica'].map(k=>r.scores?.[k]??0)])].map(row=>row.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(';')).join('\r\n');const blob=new Blob(['\ufeff'+csv],{type:'text/csv;charset=utf-8;'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='sociedade-ideal-resultados.csv';a.click();URL.revokeObjectURL(url)});
-document.getElementById('clearBtn').addEventListener('click',()=>{if(confirm('Apagar permanentemente todos os resultados salvos neste navegador? Esta ação não pode ser desfeita.')){localStorage.removeItem(KEY);render()}});render();window.addEventListener('storage',render);
-</script></body></html>
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Sociedade Ideal | Painel local</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    .panel-wrap {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 0 22px 50px;
+    }
+    .privacy-note {
+      background: #eaf7ef;
+      border: 1px solid #bfe5cb;
+      border-radius: 14px;
+      padding: 15px 18px;
+      color: #205c38;
+      margin-bottom: 22px;
+    }
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 14px;
+      margin: 20px 0;
+    }
+    .stat {
+      background: #fff;
+      border: 1px solid #e3e8ef;
+      border-radius: 16px;
+      padding: 18px;
+      box-shadow: 0 5px 18px #172b4d0b;
+    }
+    .stat small {
+      display: block;
+      color: #667085;
+      margin-bottom: 8px;
+    }
+    .stat strong {
+      font-size: 27px;
+      color: #17345e;
+    }
+    .dash-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
+    }
+    .dash-card {
+      background: white;
+      border: 1px solid #e3e8ef;
+      border-radius: 16px;
+      padding: 20px;
+      min-width: 0;
+    }
+    .bar-row {
+      display: grid;
+      grid-template-columns: 155px 1fr 42px;
+      gap: 10px;
+      align-items: center;
+      margin: 17px 0;
+    }
+    .bar-label {
+      font-size: 13px;
+    }
+    .bar-bg {
+      height: 12px;
+      background: #edf1f6;
+      border-radius: 20px;
+      overflow: hidden;
+    }
+    .bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #39a879, #72c7a0);
+      border-radius: 20px;
+    }
+    .table-wrap {
+      overflow: auto;
+    }
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      font-size: 14px;
+    }
+    th, td {
+      text-align: left;
+      padding: 12px 10px;
+      border-bottom: 1px solid #e8edf3;
+      white-space: nowrap;
+    }
+    th {
+      color: #586782;
+    }
+    .tools {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin: 18px 0;
+    }
+    .tools button {
+      cursor: pointer;
+      border: 0;
+      border-radius: 10px;
+      padding: 12px 15px;
+      font-weight: 700;
+    }
+    .export {
+      background: #17345e;
+      color: #fff;
+    }
+    .clear {
+      background: #fff0ef;
+      color: #a3322c;
+      border: 1px solid #f0c7c4 !important;
+    }
+    .empty {
+      text-align: center;
+      color: #667085;
+      padding: 28px 12px;
+    }
+    .muted {
+      color: #667085;
+      font-size: 13px;
+    }
+    @media (max-width: 850px) {
+      .stats {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+      .dash-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+    @media (max-width: 480px) {
+      .bar-row {
+        grid-template-columns: 115px 1fr 34px;
+        gap: 7px;
+      }
+      .stat {
+        padding: 14px;
+      }
+      .stat strong {
+        font-size: 23px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Barra de Navegação Superior -->
+  <header class="topbar">
+    <a class="brand" href="index.html">
+      <span class="brand-icon">🏙️</span>
+      <span>SOCIEDADE<strong>IDEAL</strong></span>
+    </a>
+    <nav class="nav" aria-label="Navegação principal">
+      <a href="index.html">Início</a>
+      <a href="quiz.html">Quiz</a>
+      <a href="resultados.html">Modelos</a>
+      <a href="painel.html" class="active">Painel</a>
+      <a href="sobre.html">Sobre</a>
+    </nav>
+    <div class="motto"><b>📊</b> Resultados da apresentação</div>
+  </header>
+
+  <!-- Conteúdo Principal -->
+  <main>
+    <div class="page-heading">
+      <h1>📊 Painel de resultados</h1>
+      <p>Acompanhe as escolhas feitas neste computador durante a apresentação.</p>
+    </div>
+
+    <div class="panel-wrap">
+      <!-- Aviso de Privacidade -->
+      <div class="privacy-note">
+        🔒 <strong>Registro local:</strong> os resultados ficam salvos neste navegador, neste computador. Não são enviados para a internet. Use sempre o mesmo navegador para manter o histórico.
+      </div>
+
+      <!-- Métricas / Contadores -->
+      <div class="stats">
+        <div class="stat">
+          <small>Participações</small>
+          <strong id="total">0</strong>
+        </div>
+        <div class="stat">
+          <small>Igualitária</small>
+          <strong id="igualitaria">0</strong>
+        </div>
+        <div class="stat">
+          <small>Desenvolvimentista</small>
+          <strong id="desenvolvimentista">0</strong>
+        </div>
+        <div class="stat">
+          <small>Sustentável</small>
+          <strong id="sustentavel">0</strong>
+        </div>
+        <div class="stat">
+          <small>Democrática</small>
+          <strong id="democratica">0</strong>
+        </div>
+      </div>
+
+      <!-- Gráficos e Última Participação -->
+      <div class="dash-grid">
+        <section class="dash-card">
+          <h2>Distribuição dos resultados</h2>
+          <p class="muted">Cada participação conta para o(s) modelo(s) com maior pontuação. Empates contam para todos os modelos empatados.</p>
+          <div id="bars"></div>
+        </section>
+
+        <section class="dash-card">
+          <h2>Última participação</h2>
+          <div id="last" class="empty">Ainda não há resultados registrados.</div>
+          <p class="muted">O painel mostra o nome informado e as respostas de cada participante; use apenas o primeiro nome ou apelido se preferir.</p>
+        </section>
+      </div>
+
+      <!-- Tabela do Histórico -->
+      <section class="dash-card" style="margin-top:18px">
+        <h2>Histórico de participações</h2>
+        <div class="tools">
+          <button class="export" id="exportBtn">⬇ Exportar CSV</button>
+          <button class="clear" id="clearBtn">Apagar histórico deste computador</button>
+        </div>
+        <div class="table-wrap" id="history"></div>
+      </section>
+
+      <p class="muted" style="margin-top:18px">Dica: teste o quiz uma vez antes de começar a feira e apague esse teste no painel. Não limpe os dados do navegador durante a apresentação.</p>
+    </div>
+  </main>
+
+  <!-- Rodapé -->
+  <footer class="footer">
+    <span>🏙️ <strong>Sociedade Ideal</strong> &nbsp; | &nbsp; Projeto escolar — Itinerário de Humanas</span>
+    <span>🍃 Juntos podemos construir um futuro melhor!</span>
+  </footer>
+
+  <!-- Script Lógico -->
+  <script>
+    const KEY = 'sociedadeIdealRegistrosV1';
+    const models = {
+      igualitaria: 'Sociedade Igualitária',
+      desenvolvimentista: 'Sociedade Desenvolvimentista',
+      sustentavel: 'Sociedade Sustentável',
+      democratica: 'Sociedade Democrática'
+    };
+
+    function read() {
+      try {
+        return JSON.parse(localStorage.getItem(KEY) || '[]');
+      } catch (e) {
+        return [];
+      }
+    }
+
+    function datefmt(iso) {
+      return new Date(iso).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' });
+    }
+
+    function esc(s) {
+      return String(s).replace(/[&<>"']/g, c => ({
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#39;'
+      }[c]));
+    }
+
+    function render() {
+      const rows = read();
+      document.getElementById('total').textContent = rows.length;
+
+      const counts = { igualitaria: 0, desenvolvimentista: 0, sustentavel: 0, democratica: 0 };
+      rows.forEach(r => (r.vencedores || []).forEach(k => {
+        if (k in counts) counts[k]++;
+      }));
+
+      Object.keys(counts).forEach(k => document.getElementById(k).textContent = counts[k]);
+
+      const max = Math.max(1, ...Object.values(counts));
+      document.getElementById('bars').innerHTML = Object.keys(counts).map(k => `
+        <div class="bar-row">
+          <span class="bar-label">${models[k].replace('Sociedade ', '')}</span>
+          <div class="bar-bg">
+            <div class="bar-fill" style="width:${counts[k] / max * 100}%"></div>
+          </div>
+          <strong>${counts[k]}</strong>
+        </div>
+      `).join('');
+
+      const last = rows[rows.length - 1];
+      document.getElementById('last').innerHTML = last ? `
+        <strong>${esc(last.nome || 'Não informado')}</strong>
+        <p>${esc(last.resultado)}</p>
+        <p>${datefmt(last.data)}</p>
+        <p class="muted">Participação ${rows.length} de ${rows.length}</p>
+      ` : 'Ainda não há resultados registrados.';
+
+      document.getElementById('history').innerHTML = rows.length ? `
+        <table>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Nome</th>
+              <th>Data e hora</th>
+              <th>Resultado</th>
+              <th>Escolhas</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${rows.slice().reverse().map((r, i) => `
+              <tr>
+                <td>${rows.length - i}</td>
+                <td>${esc(r.nome || "Não informado")}</td>
+                <td>${datefmt(r.data)}</td>
+                <td>${esc(r.resultado)}</td>
+                <td>
+                  <details>
+                    <summary>Ver respostas</summary>
+                    <ol>
+                      ${(r.respostas || []).map(a => `<li><strong>${esc(a.pergunta)}</strong><br>${esc(a.escolha)}</li>`).join('')}
+                    </ol>
+                    <p>Pontuação: ${Object.entries(r.scores || {}).map(([k, v]) => `${models[k]}: ${v}`).map(esc).join(" · ")}</p>
+                  </details>
+                </td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      ` : '<div class="empty">Nenhuma participação ainda. <a href="quiz.html">Comece pelo quiz</a>.</div>';
+    }
+
+    // Exportação em CSV
+    document.getElementById('exportBtn').addEventListener('click', () => {
+      const rows = read();
+      if (!rows.length) {
+        alert('Ainda não há resultados para exportar.');
+        return;
+      }
+      const csv = [
+        ['Participação', 'Nome', 'Data e hora', 'Resultado', 'Respostas', 'Igualitária', 'Desenvolvimentista', 'Sustentável', 'Democrática'],
+        ...rows.map((r, i) => [
+          i + 1,
+          r.nome || 'Não informado',
+          datefmt(r.data),
+          r.resultado,
+          (r.respostas || []).map(a => a.pergunta + ': ' + a.escolha).join(' | '),
+          ...['igualitaria', 'desenvolvimentista', 'sustentavel', 'democratica'].map(k => r.scores?.[k] ?? 0)
+        ])
+      ].map(row => row.map(v => '"' + String(v).replace(/"/g, '""') + '"').join(';')).join('\r\n');
+
+      const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'sociedade-ideal-resultados.csv';
+      a.click();
+      URL.revokeObjectURL(url);
+    });
+
+    // Limpeza de Histórico
+    document.getElementById('clearBtn').addEventListener('click', () => {
+      if (confirm('Apagar permanentemente todos os resultados salvos neste navegador? Esta ação não pode ser desfeita.')) {
+        localStorage.removeItem(KEY);
+        render();
+      }
+    });
+
+    render();
+    window.addEventListener('storage', render);
+  </script>
+</body>
+</html>
