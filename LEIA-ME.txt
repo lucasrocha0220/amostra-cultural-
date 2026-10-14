@@ -1,0 +1,19 @@
+SOCIEDADE IDEAL — SITE COM REGISTRO LOCAL
+
+Como usar:
+1. Extraia todos os arquivos do ZIP para uma pasta no computador da apresentação.
+2. Abra index.html no navegador (de preferência Chrome ou Edge).
+3. Cada vez que alguém concluir as doze perguntas, o resultado é registrado no armazenamento local do navegador.
+4. Abra Painel no menu para acompanhar o total, distribuição e histórico.
+5. No Painel, use Exportar CSV para guardar uma planilha ou Apagar histórico para começar do zero.
+
+Importante:
+- Não usa banco de dados online e não envia resultados para a internet.
+- Os dados ficam apenas neste computador e neste perfil do navegador.
+- Use sempre o mesmo navegador e não limpe os dados do site durante a apresentação.
+- Recomenda-se testar uma vez e apagar o registro de teste antes da feira.
+- Se o navegador não permitir armazenamento ao abrir arquivos diretamente, abra a pasta com um servidor local simples (por exemplo, extensão Live Server no VS Code).
+
+ATUALIZAÇÃO: agora o quiz pede o nome antes de começar e salva nome, data/hora, respostas individuais e pontuação no histórico local. No Painel, abra 'Ver respostas' para rever as escolhas de cada participante. Tudo fica apenas neste navegador/computador; não é um banco online.
+
+NOVA ATUALIZAÇÃO: o quiz agora tem 12 perguntas. Na tela inicial do quiz, a pessoa pode digitar o mesmo nome e clicar em “Consultar resultado salvo” para recuperar seu resultado mais recente e rever as respostas. O menu “Modelos” continua mostrando os quatro resultados possíveis.
